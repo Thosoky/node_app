@@ -1,0 +1,34 @@
+
+
+name: node_app
+
+on: # Указываем сборку для автоматического запуска ci/cd
+  push:
+    branches:
+        - "main"
+
+jobs:
+  build:
+      name: Build Docker image
+      runs-on: ubuntu-latest # Указываем ОС для работы приложения
+      steps:
+          - # Клонируем код приложения в ОС
+              name: Checkout
+              uses: actions/checkout@v3
+          - # Входим в DockerHub, используя токен
+              name: Login to Docker Hub
+              uses: docker/login-action@v2
+              with:
+                username: ${{ secrets.DOCKERHUB_USERNAME }}
+                password: ${{ secrets.DOCKERHUB_TOKEN }}
+          - # Создаем экземпляр build kit builder
+              name: Set up Docker Build
+              uses: docker/setup-build-action@v2
+          - # Создаем образ контейнера и отправляем его в DockerHub тегом clockbox
+              name: Build and push
+              uses: docker/build-push-action@v4
+              with:
+                context: .
+                file: ./Dockerfile
+                push: true
+                tags: ${{ secrets.DOCKERHUB_USERNAME }}clockbox:latest
